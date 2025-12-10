@@ -4,15 +4,59 @@ import os
 # --- 1. CONFIGURACIÓN ---
 st.set_page_config(page_title="Portal IA - UC", layout="wide", page_icon="🏛️")
 
-# --- 2. ESTILO VISUAL ---
+# --- 2. ESTILO VISUAL CORREGIDO ---
 st.markdown("""
 <style>
-    .stApp {background-color: #f8f9fa;}
-    section[data-testid="stSidebar"] {background-color: #002469;}
-    section[data-testid="stSidebar"] p, section[data-testid="stSidebar"] span, section[data-testid="stSidebar"] h1, section[data-testid="stSidebar"] h2, section[data-testid="stSidebar"] h3, section[data-testid="stSidebar"] label {color: white !important;}
-    h1, h2, h3 {color: #002469 !important;}
-    div[data-testid="stVerticalBlockBorderWrapper"] {background-color: white; padding: 20px; border-radius: 10px; border: 1px solid #ddd; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
-    .contacto-box {background-color: #e3f2fd; padding: 15px; border-radius: 8px; border-left: 5px solid #002469; color: #002469;}
+    /* 1. Fondo y Texto General (OSCURO para que se lea) */
+    .stApp {
+        background-color: #f8f9fa;
+        color: #333333; /* Gris oscuro */
+    }
+    
+    /* Asegurar que los párrafos del cuerpo sean oscuros */
+    .stApp p, .stMarkdown p {
+        color: #333333 !important;
+    }
+
+    /* 2. Barra Lateral (AZUL con texto BLANCO) */
+    section[data-testid="stSidebar"] {
+        background-color: #002469;
+    }
+    /* Todo el texto dentro de la barra lateral será blanco */
+    section[data-testid="stSidebar"] * {
+        color: white !important;
+    }
+
+    /* 3. Títulos (Azul UC) */
+    h1, h2, h3 {
+        color: #002469 !important;
+    }
+
+    /* 4. Tarjetas (Fondo blanco, texto oscuro) */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Caja de Contacto */
+    .contacto-box {
+        background-color: #e3f2fd;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 5px solid #002469;
+        color: #002469 !important;
+    }
+    .contacto-box h4 {
+        color: #002469 !important;
+        margin: 0;
+    }
+    .contacto-box a {
+        color: #002469 !important;
+        font-weight: bold;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -24,14 +68,14 @@ with st.sidebar:
     elif os.path.exists("logo.jpg"):
         st.image("logo.jpg", use_container_width=True)
     else:
-        st.warning("⚠️ Falta 'logo.png' en la carpeta")
+        st.warning("⚠️ Falta 'logo.png'")
 
     st.write("---")
     st.header("📌 Menú")
     opcion = st.radio("Navegación:", ["🏠 Inicio", "🚀 Catálogo de IAs", "📚 Guía y Soporte"])
     st.write("---")
     
-    # CONTACTO (Ahora sí debería salir)
+    # CONTACTO 
     st.subheader("📞 Contacto")
     st.markdown("**Alonso Meneses**")
     st.caption("📧 armenesesz@uc.cl")
@@ -44,7 +88,7 @@ with st.sidebar:
 if opcion == "🏠 Inicio":
     st.title("🏛️ Portal de Inteligencia Artificial")
     
-    # BANNER CENTRADO (Más pequeño)
+    # BANNER CENTRADO
     col_izq, col_centro, col_der = st.columns([1, 2, 1])
     with col_centro:
         if os.path.exists("banner.jpg"):
@@ -52,7 +96,7 @@ if opcion == "🏠 Inicio":
         elif os.path.exists("banner.png"):
             st.image("banner.png", width=500)
         else:
-            st.info("🖼️ Falta 'banner.jpg' en la carpeta")
+            st.info("🖼️ Falta 'banner.jpg'")
 
     # INSTRUCCIONES
     st.markdown("---")
@@ -129,6 +173,15 @@ elif opcion == "🚀 Catálogo de IAs":
             st.subheader("Julius AI")
             st.write("Analista de datos. Sube Excel y pide gráficos.")
             st.markdown("[🔗 **Abrir Julius**](https://julius.ai)")
+            
+    # FILA 3
+    c7, c8 = st.columns([1,2])
+    with c7:
+         with st.container(border=True):
+            st.image("https://cdn-icons-png.flaticon.com/512/4504/4504605.png", width=50)
+            st.subheader("HeyGen")
+            st.write("Videos con avatares parlantes.")
+            st.markdown("[🔗 **Abrir HeyGen**](https://www.heygen.com)")
 
 # === SOPORTE ===
 elif opcion == "📚 Guía y Soporte":
