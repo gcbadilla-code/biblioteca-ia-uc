@@ -1,207 +1,272 @@
 import streamlit as st
 import os
+import base64
 
-# --- 1. CONFIGURACIÓN (ICONO NEGRO Y TÍTULO OFICIAL) ---
+# --- 1. CONFIGURACIÓN ---
 st.set_page_config(
     page_title="Portal IA - Pontificia Universidad Católica de Chile",
     layout="wide",
-    page_icon="🛡️", # Usamos un escudo que se ve oscuro/negro en la mayoría de navegadores
+    page_icon="🏛️",
     initial_sidebar_state="expanded"
 )
 
-# --- 2. FUNCIÓN DE IMÁGENES ---
-def mostrar_imagen(nombre_base, ancho=None, banner_completo=False):
-    ruta = None
-    if os.path.exists(f"{nombre_base}.png"): ruta = f"{nombre_base}.png"
-    elif os.path.exists(f"{nombre_base}.jpg"): ruta = f"{nombre_base}.jpg"
-    
-    if ruta:
-        if banner_completo:
-            # Para que el banner ocupe TODO el ancho y se vea HD
-            st.image(ruta, use_container_width=True)
-        elif ancho:
-            st.image(ruta, width=ancho)
-        else:
-            st.image(ruta, use_container_width=True)
-    else:
-        st.warning(f"⚠️ Falta imagen: {nombre_base}.png")
+# --- 2. FUNCIONES TÉCNICAS (HTML + IMÁGENES) ---
 
-# --- 3. ESTILO VISUAL (TIPOGRAFÍA ROBOTO UC) ---
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+def get_img_tag(nombre_archivo, ancho=80):
+    if os.path.exists(f"{nombre_archivo}.png"):
+        ruta = f"{nombre_archivo}.png"
+        ext = "png"
+    elif os.path.exists(f"{nombre_archivo}.jpg"):
+        ruta = f"{nombre_archivo}.jpg"
+        ext = "jpg"
+    else:
+        return "" 
+    
+    base64_img = get_base64_of_bin_file(ruta)
+    return f'<img src="data:image/{ext};base64,{base64_img}" width="{ancho}" style="margin-bottom:10px;">'
+
+# Esta función crea la tarjeta blanca HTML para las IAs
+def tarjeta_html(imagen_nombre, titulo, descripcion, link_url, link_texto):
+    img_html = get_img_tag(imagen_nombre, ancho=80)
+    
+    return f"""
+    <div class="tarjeta-blanca hvr-grow">
+        <div style="display: flex; align-items: flex-start; gap: 15px;">
+            <div style="flex-shrink: 0;">{img_html}</div>
+            <div>
+                <h3 style="margin: 0 0 10px 0; color: #002469; font-size: 1.2rem;">{titulo}</h3>
+                <p style="color: #444; font-size: 0.95rem; margin-bottom: 15px; line-height: 1.4;">{descripcion}</p>
+                <a href="{link_url}" target="_blank" class="boton-link">{link_texto} ➝</a>
+            </div>
+        </div>
+    </div>
+    """
+
+# --- 3. CSS (DISEÑO LIMPIO) ---
 st.markdown("""
 <style>
-    /* IMPORTAR FUENTE ROBOTO (OFICIAL UC) */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
-
-    /* APLICAR FUENTE ROBOTO A TODO */
-    html, body, [class*="css"], p, h1, h2, h3, h4, li, span, div, a {
-        font-family: 'Roboto', sans-serif !important;
-        color: #212529 !important; /* Negro corporativo */
-    }
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
     
-    /* Barra Lateral Azul UC */
+    html, body, [class*="css"] { font-family: 'Roboto', sans-serif; }
+
+    /* ESTILO DE LA TARJETA BLANCA (EL "DIV" DE TU POLOLO) */
+    .tarjeta-blanca {
+        background-color: #ffffff !important;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 1px solid #e0e0e0;
+        margin-bottom: 20px;
+    }
+
+    /* EFECTO HOVER */
+    .hvr-grow { transition: all .2s ease-in-out; }
+    .hvr-grow:hover { transform: scale(1.01); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+
+    /* BOTÓN LINK */
+    .boton-link {
+        display: inline-block;
+        text-decoration: none;
+        color: #009FE3;
+        font-weight: 700;
+        font-size: 14px;
+    }
+    .boton-link:hover { text-decoration: underline; }
+
+    /* BARRA LATERAL */
     section[data-testid="stSidebar"] { background-color: #002469 !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
     
-    /* Tarjetas (Cards) */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: white;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Sombra más sutil y elegante */
-        padding: 25px;
+    /* TITULOS SECCIONES */
+    .titulo-seccion {
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 10px 20px;
         border-radius: 8px;
-        text-align: center;
+        display: inline-block;
+        color: #002469;
+        font-weight: 700;
+        margin-top: 30px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        border-left: 5px solid #002469;
     }
-
-    /* Títulos con peso oficial */
-    h1, h2, h3 { font-weight: 700 !important; color: #002469 !important; }
     
-    /* Enlaces */
-    a { color: #002469 !important; font-weight: 700; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    /* Cajas de texto corporativas */
-    .instruccion-box {
-        background-color: #f0f4f8;
-        border-left: 4px solid #002469;
-        padding: 20px;
-        color: #002469 !important;
+    /* METRICAS (Estilo propio para que se vean blancas) */
+    .metrica-box {
+        text-align: center;
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #eee;
     }
-    .advertencia-box {
-        background-color: #fffdf0;
-        border-left: 4px solid #ffc107;
-        padding: 20px;
-        color: #856404 !important;
-    }
+    .metrica-num { font-size: 24px; font-weight: bold; color: #002469; }
+    .metrica-label { font-size: 14px; color: #666; }
+    .metrica-sub { font-size: 12px; color: #28a745; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 4. BARRA LATERAL ---
+# --- 4. FONDO ---
+if os.path.exists("fondo.jpg") or os.path.exists("fondo.png"):
+    nombre_fondo = "fondo.png" if os.path.exists("fondo.png") else "fondo.jpg"
+    bg_b64 = get_base64_of_bin_file(nombre_fondo)
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/png;base64,{bg_b64}");
+            background-size: cover;
+            background-attachment: fixed;
+        }}
+        .main .block-container {{ background: transparent !important; }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# --- 5. NAVEGACIÓN ---
 with st.sidebar:
-    mostrar_imagen("logo")
+    st.markdown(get_img_tag("logo", ancho=200), unsafe_allow_html=True)
     st.write("---")
-    st.header("📌 Navegación")
-    opcion = st.radio("Ir a:", ["🏠 Inicio", "🚀 Catálogo de IAs", "📚 Guía y Soporte"])
+    # MENÚ SIN EMOJIS
+    opcion = st.radio("Ir a:", ["Inicio", "Catálogo de Soluciones", "Soporte"])
     st.write("---")
-    st.subheader("📞 Contacto")
-    st.markdown("**Alonso Meneses**")
-    st.caption("📧 armenesesz@uc.cl")
-    st.write("---")
-    st.markdown("© 2025 Dirección de Personas UC")
+    st.markdown("**Contacto:** Alonso Meneses\n\n📧 armenesesz@uc.cl")
 
-# --- 5. CONTENIDO PRINCIPAL ---
+# --- 6. CONTENIDO ---
 
-# === INICIO ===
-if opcion == "🏠 Inicio":
-    # Banner a pantalla completa (HD)
-    mostrar_imagen("banner", banner_completo=True)
-
-    st.title("Portal de Inteligencia Artificial UC")
-    st.markdown("### Bienvenido/a a tu Centro de Comando Digital")
-    st.write("Plataforma centralizada para el acceso a herramientas de IA permitidas para la comunidad universitaria.")
-
+if opcion == "Inicio":
+    # Banner
+    st.markdown(f"<div style='text-align:center;'>{get_img_tag('banner', ancho='100%')}</div>", unsafe_allow_html=True)
+    
+    # 1. TARJETA DE BIENVENIDA (Restaurada y Limpia)
     st.markdown("""
-    <div class="instruccion-box">
-        <h4>👉 ¿CÓMO EMPEZAR?</h4>
-        <p>1. Dirígete al <strong>menú azul de la izquierda</strong>.</p>
-        <p>2. Haz clic en <strong>"🚀 Catálogo de IAs"</strong>.</p>
-        <p>3. Selecciona la herramienta que necesites.</p>
+    <div class="tarjeta-blanca">
+        <h2 style="color: #002469; margin-top:0;">Bienvenido/a a tu Centro de Comando Digital</h2>
+        <p style="font-size: 16px; color: #333;">
+            Esta plataforma centraliza y facilita el acceso a las herramientas de Inteligencia Artificial permitidas para la comunidad universitaria.
+        </p>
+        <hr style="margin: 20px 0; border-top: 1px solid #eee;">
+        <p style="color: #002469; font-weight: bold;">👉 Para comenzar:</p>
+        <ol style="color: #444;">
+            <li>Dirígete al menú azul de la izquierda.</li>
+            <li>Selecciona <strong>"Catálogo de Soluciones"</strong>.</li>
+            <li>Elige la herramienta que necesites.</li>
+        </ol>
     </div>
     """, unsafe_allow_html=True)
     
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Herramientas", "7 IAs", "Disponibles")
-    c2.metric("Acceso", "Comunidad UC", "Gratuito")
-    c3.metric("Categorías", "3 Áreas", "Texto, Visual, Datos")
-    
-    st.write("---")
-    
+    # 2. MÉTRICAS (Restauradas en formato HTML para que sean blancas)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("""
+        <div class="tarjeta-blanca" style="text-align: center;">
+            <div class="metrica-label">Herramientas</div>
+            <div class="metrica-num">7 IAs</div>
+            <div class="metrica-sub">Disponibles</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="tarjeta-blanca" style="text-align: center;">
+            <div class="metrica-label">Acceso</div>
+            <div class="metrica-num">Comunidad UC</div>
+            <div class="metrica-sub">Gratuito</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown("""
+        <div class="tarjeta-blanca" style="text-align: center;">
+            <div class="metrica-label">Categorías</div>
+            <div class="metrica-num">3 Áreas</div>
+            <div class="metrica-sub">Texto, Visual, Datos</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # 3. AVISO DE SEGURIDAD (Restaurado)
     st.markdown("""
-    <div class="advertencia-box">
-        <h4>⚠️ SEGURIDAD DE LA INFORMACIÓN</h4>
-        <ul>
-            <li><strong>NO ingreses datos confidenciales:</strong> Rut, fichas, datos bancarios.</li>
-            <li><strong>Verifica siempre:</strong> Tú eres el responsable del contenido.</li>
+    <div class="tarjeta-blanca" style="border-left: 5px solid #ffc107;">
+        <h4 style="color: #856404; margin-top:0;">⚠️ Seguridad de la Información</h4>
+        <ul style="color: #856404; margin-bottom:0;">
+            <li><strong>No ingreses datos confidenciales</strong> (RUT, fichas clínicas, datos bancarios).</li>
+            <li><strong>Verifica siempre la información:</strong> Las IAs pueden cometer errores. Tú eres el responsable final.</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
-# === CATÁLOGO ===
-elif opcion == "🚀 Catálogo de IAs":
-    st.title("🚀 Catálogo de Soluciones")
-    st.write("Explora las herramientas disponibles por categoría.")
+elif opcion == "Catálogo de Soluciones":
     
-    # SECCIÓN 1
-    st.subheader("📝 Redacción y Oficina")
+    # Título en tarjeta
+    st.markdown('<div class="tarjeta-blanca"><h1 style="margin:0; color:#002469;">Catálogo de Soluciones</h1><p>Explora las herramientas disponibles.</p></div>', unsafe_allow_html=True)
+
+    # --- SECCIÓN 1 ---
+    st.markdown('<div class="titulo-seccion">Redacción y Oficina</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     
     with c1:
-        with st.container(border=True):
-            mostrar_imagen("copilot", ancho=120)
-            st.markdown("### Copilot")
-            st.write("Tu experto en Microsoft Office. Ideal para Excel, analizar datos y redactar correos.")
-            st.markdown("[🔗 **Abrir Copilot**](https://copilot.microsoft.com)")
-
+        st.markdown(tarjeta_html(
+            "copilot", "Copilot", 
+            "Experto en Office. Analiza Excel, crea fórmulas y redacta en Word de forma segura.", 
+            "https://copilot.microsoft.com", "Abrir Copilot"
+        ), unsafe_allow_html=True)
     with c2:
-        with st.container(border=True):
-            mostrar_imagen("chatgpt", ancho=120)
-            st.markdown("### ChatGPT")
-            st.write("Motor de creatividad. Úsalo para ideas, borradores y traducciones.")
-            st.markdown("[🔗 **Abrir ChatGPT**](https://chat.openai.com)")
-
+        st.markdown(tarjeta_html(
+            "chatgpt", "ChatGPT", 
+            "Motor de creatividad. Ideal para lluvias de ideas, borradores y traducciones rápidas.", 
+            "https://chat.openai.com", "Abrir ChatGPT"
+        ), unsafe_allow_html=True)
     with c3:
-        with st.container(border=True):
-            mostrar_imagen("gemini", ancho=120)
-            st.markdown("### Gemini")
-            st.write("Razonamiento lógico. Analiza imágenes y procesa mucha información.")
-            st.markdown("[🔗 **Abrir Gemini**](https://gemini.google.com)")
+        st.markdown(tarjeta_html(
+            "gemini", "Gemini", 
+            "Lógica avanzada. Úsalo para razonamiento complejo y análisis de imágenes.", 
+            "https://gemini.google.com", "Abrir Gemini"
+        ), unsafe_allow_html=True)
 
-    # SECCIÓN 2
-    st.write("---")
-    st.subheader("🎨 Diseño y Video")
+    # --- SECCIÓN 2 ---
+    st.markdown('<div class="titulo-seccion">Diseño y Video</div>', unsafe_allow_html=True)
     c4, c5, c6 = st.columns(3)
-
+    
     with c4:
-        with st.container(border=True):
-            mostrar_imagen("remini", ancho=120)
-            st.markdown("### Remini")
-            st.write("Restaura fotos antiguas o borrosas a alta calidad.")
-            st.markdown("[🔗 **Abrir Remini**](https://remini.ai)")
-            
+        st.markdown(tarjeta_html(
+            "remini", "Remini", 
+            "Restauración fotográfica. Recupera la calidad de fotos antiguas o borrosas a HD.", 
+            "https://remini.ai", "Abrir Remini"
+        ), unsafe_allow_html=True)
     with c5:
-        with st.container(border=True):
-            mostrar_imagen("gamma", ancho=120)
-            st.markdown("### Gamma")
-            st.write("Crea presentaciones (PPT) completas solo con un título.")
-            st.markdown("[🔗 **Abrir Gamma**](https://gamma.app)")
-
+        st.markdown(tarjeta_html(
+            "gamma", "Gamma", 
+            "Presentaciones automáticas. Crea PPTs completos solo escribiendo el título.", 
+            "https://gamma.app", "Abrir Gamma"
+        ), unsafe_allow_html=True)
     with c6:
-        with st.container(border=True):
-            mostrar_imagen("heygen", ancho=120)
-            st.markdown("### HeyGen")
-            st.write("Crea videos con avatares virtuales que hablan tu texto.")
-            st.markdown("[🔗 **Abrir HeyGen**](https://www.heygen.com)")
+        st.markdown(tarjeta_html(
+            "heygen", "HeyGen", 
+            "Videos con avatares. Crea comunicados con personajes virtuales que hablan tu texto.", 
+            "https://www.heygen.com", "Abrir HeyGen"
+        ), unsafe_allow_html=True)
 
-    # SECCIÓN 3
-    st.write("---")
-    st.subheader("📊 Datos")
+    # --- SECCIÓN 3 ---
+    st.markdown('<div class="titulo-seccion">Datos</div>', unsafe_allow_html=True)
     c7, c8 = st.columns([1, 2])
     
     with c7:
-        with st.container(border=True):
-            mostrar_imagen("julius", ancho=120)
-            st.markdown("### Julius AI")
-            st.write("Científico de datos. Sube Excel y pide gráficos sin fórmulas.")
-            st.markdown("[🔗 **Abrir Julius**](https://julius.ai)")
+        st.markdown(tarjeta_html(
+            "julius", "Julius AI", 
+            "Analista de datos. Sube tu Excel y pídele gráficos y tendencias sin usar fórmulas.", 
+            "https://julius.ai", "Abrir Julius"
+        ), unsafe_allow_html=True)
 
-# === SOPORTE ===
-elif opcion == "📚 Guía y Soporte":
-    st.title("📚 Centro de Ayuda")
-    st.markdown("Si tienes dudas o necesitas reportar un problema, estamos para ayudarte.")
-    
+elif opcion == "Soporte":
+    st.markdown('<div class="titulo-seccion">Centro de Ayuda</div>', unsafe_allow_html=True)
     st.markdown("""
-    <div class="instruccion-box">
-        <h4>👤 Contacto Oficial</h4>
-        <p><strong>Alonso Meneses</strong></p>
-        <p>📧 <a href="mailto:armenesesz@uc.cl">armenesesz@uc.cl</a></p>
+    <div class="tarjeta-blanca">
+        <h4 style="color:#002469; margin-top:0;">👤 Contacto Oficial</h4>
+        <p style="color:#333;">Si tienes dudas sobre el uso de las herramientas o necesitas reportar un problema:</p>
+        <p><strong>Alonso Meneses</strong><br>Analista de Capacitación</p>
+        <p>📧 <a href="mailto:armenesesz@uc.cl" style="color:#009FE3; font-weight:bold;">armenesesz@uc.cl</a></p>
     </div>
     """, unsafe_allow_html=True)
