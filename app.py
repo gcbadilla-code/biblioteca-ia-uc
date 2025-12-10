@@ -6,11 +6,11 @@ import base64
 st.set_page_config(
     page_title="Portal IA - Pontificia Universidad Católica de Chile",
     layout="wide",
-    page_icon="🏛️",
+    page_icon="🛡️",
     initial_sidebar_state="expanded"
 )
 
-# --- 2. FUNCIONES TÉCNICAS (HTML + IMÁGENES) ---
+# --- 2. FUNCIONES TÉCNICAS ---
 
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -30,7 +30,6 @@ def get_img_tag(nombre_archivo, ancho=80):
     base64_img = get_base64_of_bin_file(ruta)
     return f'<img src="data:image/{ext};base64,{base64_img}" width="{ancho}" style="margin-bottom:10px;">'
 
-# Esta función crea la tarjeta blanca HTML para las IAs
 def tarjeta_html(imagen_nombre, titulo, descripcion, link_url, link_texto):
     img_html = get_img_tag(imagen_nombre, ancho=80)
     
@@ -47,14 +46,17 @@ def tarjeta_html(imagen_nombre, titulo, descripcion, link_url, link_texto):
     </div>
     """
 
-# --- 3. CSS (DISEÑO LIMPIO) ---
+# --- 3. CSS (FIRMA MOVIMIENTO A ARRIBA A LA DERECHA) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
     
     html, body, [class*="css"] { font-family: 'Roboto', sans-serif; }
 
-    /* ESTILO DE LA TARJETA BLANCA (EL "DIV" DE TU POLOLO) */
+    /* OCULTAR MARCA DE STREAMLIT */
+    footer {visibility: hidden;} 
+
+    /* TARJETA BLANCA */
     .tarjeta-blanca {
         background-color: #ffffff !important;
         padding: 25px;
@@ -68,7 +70,7 @@ st.markdown("""
     .hvr-grow { transition: all .2s ease-in-out; }
     .hvr-grow:hover { transform: scale(1.01); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
 
-    /* BOTÓN LINK */
+    /* BOTONES */
     .boton-link {
         display: inline-block;
         text-decoration: none;
@@ -82,7 +84,7 @@ st.markdown("""
     section[data-testid="stSidebar"] { background-color: #002469 !important; }
     section[data-testid="stSidebar"] * { color: white !important; }
     
-    /* TITULOS SECCIONES */
+    /* TITULOS */
     .titulo-seccion {
         background-color: rgba(255, 255, 255, 0.95);
         padding: 10px 20px;
@@ -95,18 +97,22 @@ st.markdown("""
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         border-left: 5px solid #002469;
     }
-    
-    /* METRICAS (Estilo propio para que se vean blancas) */
-    .metrica-box {
-        text-align: center;
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        border: 1px solid #eee;
+
+    /* --- TU MARCA DE AGUA (FIRMA) MOVIDA ARRIBA A LA DERECHA (POSICIÓN SEGURA) --- */
+    .watermark {
+        position: fixed;
+        top: 15px; /* <--- ARRIBA */
+        right: 15px; /* <--- DERECHA */
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        color: #555;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        z-index: 999999; 
+        pointer-events: none;
     }
-    .metrica-num { font-size: 24px; font-weight: bold; color: #002469; }
-    .metrica-label { font-size: 14px; color: #666; }
-    .metrica-sub { font-size: 12px; color: #28a745; font-weight: bold; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -132,7 +138,6 @@ if os.path.exists("fondo.jpg") or os.path.exists("fondo.png"):
 with st.sidebar:
     st.markdown(get_img_tag("logo", ancho=200), unsafe_allow_html=True)
     st.write("---")
-    # MENÚ SIN EMOJIS
     opcion = st.radio("Ir a:", ["Inicio", "Catálogo de Soluciones", "Soporte"])
     st.write("---")
     st.markdown("**Contacto:** Alonso Meneses\n\n📧 armenesesz@uc.cl")
@@ -140,10 +145,8 @@ with st.sidebar:
 # --- 6. CONTENIDO ---
 
 if opcion == "Inicio":
-    # Banner
     st.markdown(f"<div style='text-align:center;'>{get_img_tag('banner', ancho='100%')}</div>", unsafe_allow_html=True)
     
-    # 1. TARJETA DE BIENVENIDA (Restaurada y Limpia)
     st.markdown("""
     <div class="tarjeta-blanca">
         <h2 style="color: #002469; margin-top:0;">Bienvenido/a a tu Centro de Comando Digital</h2>
@@ -160,7 +163,6 @@ if opcion == "Inicio":
     </div>
     """, unsafe_allow_html=True)
     
-    # 2. MÉTRICAS (Restauradas en formato HTML para que sean blancas)
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("""
@@ -187,7 +189,6 @@ if opcion == "Inicio":
         </div>
         """, unsafe_allow_html=True)
 
-    # 3. AVISO DE SEGURIDAD (Restaurado)
     st.markdown("""
     <div class="tarjeta-blanca" style="border-left: 5px solid #ffc107;">
         <h4 style="color: #856404; margin-top:0;">⚠️ Seguridad de la Información</h4>
@@ -200,10 +201,8 @@ if opcion == "Inicio":
 
 elif opcion == "Catálogo de Soluciones":
     
-    # Título en tarjeta
     st.markdown('<div class="tarjeta-blanca"><h1 style="margin:0; color:#002469;">Catálogo de Soluciones</h1><p>Explora las herramientas disponibles.</p></div>', unsafe_allow_html=True)
 
-    # --- SECCIÓN 1 ---
     st.markdown('<div class="titulo-seccion">Redacción y Oficina</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     
@@ -226,7 +225,6 @@ elif opcion == "Catálogo de Soluciones":
             "https://gemini.google.com", "Abrir Gemini"
         ), unsafe_allow_html=True)
 
-    # --- SECCIÓN 2 ---
     st.markdown('<div class="titulo-seccion">Diseño y Video</div>', unsafe_allow_html=True)
     c4, c5, c6 = st.columns(3)
     
@@ -249,7 +247,6 @@ elif opcion == "Catálogo de Soluciones":
             "https://www.heygen.com", "Abrir HeyGen"
         ), unsafe_allow_html=True)
 
-    # --- SECCIÓN 3 ---
     st.markdown('<div class="titulo-seccion">Datos</div>', unsafe_allow_html=True)
     c7, c8 = st.columns([1, 2])
     
@@ -265,8 +262,14 @@ elif opcion == "Soporte":
     st.markdown("""
     <div class="tarjeta-blanca">
         <h4 style="color:#002469; margin-top:0;">👤 Contacto Oficial</h4>
-        <p style="color:#333;">Si tienes dudas sobre el uso de las herramientas o necesitas reportar un problema:</p>
-        <p><strong>Alonso Meneses</strong><br>Analista de Capacitación</p>
+        <p><strong>Alonso Meneses</strong><br>Coordinador del Proyecto</p>
         <p>📧 <a href="mailto:armenesesz@uc.cl" style="color:#009FE3; font-weight:bold;">armenesesz@uc.cl</a></p>
     </div>
     """, unsafe_allow_html=True)
+
+# --- TU FIRMA (PROTEGIDA Y VISIBLE) ---
+st.markdown("""
+    <div class="watermark">
+        Desarrollado por <strong>Genesis Badilla</strong>
+    </div>
+""", unsafe_allow_html=True)
